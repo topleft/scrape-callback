@@ -4,34 +4,43 @@ var request=require("request");
 var cheerio=require("cheerio");
 
 var goldenPrize;
+var hacker = 'https://news.ycombinator.com/';
+var redditDev = 'https://www.reddit.com/r/Web_Development/';
+var mdn = 'https://developer.mozilla.org/en-US/docs/Web/JavaScript';
+var python = 'https://www.python.org';
 
-request('https://news.ycombinator.com/', function(error, response, html){
+request(hacker, function(error, response, html){
     if (!error && response.statusCode == 200) {
         var hasJavascript = (getFirstTitle(html, '.title a', checkForKeyword));
+        
         if (hasJavascript) {
-            request('https://www.reddit.com/r/Web_Development/', function(error, response, html){
+            request(redditDev, function(error, response, html){
                 var hasJavascript2 = getFirstTitle(html, '.title .may-blank', checkForKeyword);
+                
                 if(hasJavascript2){
-                    request('https://developer.mozilla.org/en-US/docs/Web/JavaScript', function(error, response, html){
+                    request(mdn, function(error, response, html){
+                        
                         if (!error && response.statusCode == 200) {
-                            console.log(html);
-                            goldenPrize = getFirstImg(html, 'https://developer.mozilla.org/en-US/docs/Web/JavaScript');
+                            goldenPrize = getFirstImg(html, mdn);
                             return goldenPrize;
                         }
                     });
                 }
             });
         }
+        
         else {
-            request('https://www.python.org/', function(error, response, html){
+            request(python, function(error, response, html){
+                
                 if (!error && response.statusCode == 200) {
-                    goldenPrize = getFirstImg(html, 'https://www.python.org');
+                    goldenPrize = getFirstImg(html, python);
                     return goldenPrize;
                 }
             });
         }
     }
 });
+
 
 function getFirstTitle(html, selectorQuery, cb){
     var $ = cheerio.load(html);
@@ -47,7 +56,6 @@ function getFirstTitle(html, selectorQuery, cb){
 
 function getFirstImg(html, url) {
     var $ = cheerio.load(html);
-    console.log("$$$:", $('img').attr('src'));
     var src = $('img').attr('src');
     var pic = url + src;
     return pic;
